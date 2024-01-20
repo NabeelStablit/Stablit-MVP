@@ -6,19 +6,13 @@ import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/Confir
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 
 
-interface BaseContract {
-    function formulaUpdation() external;
-}
-
 contract PricesAPI is FunctionsClient, ConfirmedOwner {
 
-    BaseContract public baseContract;
-
-    constructor(address _addressbaseContract) FunctionsClient(router) ConfirmedOwner(msg.sender) {
-        baseContract = BaseContract(_addressbaseContract);
-    }
+    constructor() FunctionsClient(router) ConfirmedOwner(msg.sender) {}
 
     event APICallCompleted(bytes32 requestId, string result);
+
+    string public value;
 
     using FunctionsRequest for FunctionsRequest.Request;
 
@@ -32,7 +26,7 @@ contract PricesAPI is FunctionsClient, ConfirmedOwner {
 
     // sepolia
     address router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
-    uint64 subscriptionId = 1068;
+    uint64 subscriptionId = 1908;
     bytes32 donID =
         0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
 
@@ -41,13 +35,15 @@ contract PricesAPI is FunctionsClient, ConfirmedOwner {
 
     string priceAPI =
         "const apiResponse = await Functions.makeHttpRequest({"
-        "url: `https://adgen.pythonanywhere.com/generate-ad-poster/`"
-        "});"
+        "url: `https://nabeelbhaiccxt-zvglklnxya-em.a.run.app/`"
+        "})"
         "if (apiResponse.error) {"
-        "throw Error('Request failed');"
+        "  console.error(apiResponse.error)"
+        "  throw Error('Request failed')"
         "}"
         "const { data } = apiResponse;"
-        "return Functions.encodeString(data[0].url);";
+        "return Functions.encodeString(data.price)";
+
 
     function callAPI(
         string[] calldata args
@@ -74,9 +70,8 @@ contract PricesAPI is FunctionsClient, ConfirmedOwner {
             revert UnexpectedRequestID(requestId);
         }
         result = string(response);
-        // 
-        baseContract.formulaUpdation();
-        // 
+        // console.log(response);
+        value = result;
         s_lastResponse = response;
         s_lastError = err;
         isFullfilled = true;
